@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Project — Mechanovia</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=Bebas+Neue&display=swap" rel="stylesheet"/>
+<style>
+  :root{--black:#080a08;--black-2:#0f120f;--black-3:#161a16;--black-4:#1e231e;--green:#00b04f;--green-dim:#008c3e;--green-faint:rgba(0,176,79,0.06);--white:#f0f2f0;--gray:#8a9a8a;--gray-dim:#4a5a4a;--border:rgba(0,176,79,0.18);--border-dim:rgba(255,255,255,0.06);--font-display:'Bebas Neue',sans-serif;--font-head:'Rajdhani',sans-serif;--font-body:'DM Mono',monospace;}
+  body.light-mode{--black:#f4f6f4;--black-2:#eaecea;--black-3:#e0e3e0;--black-4:#d4d8d4;--white:#0f120f;--gray:#4a5a4a;--gray-dim:#8a9a8a;--border-dim:rgba(0,0,0,0.08);}
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+  html{scroll-behavior:smooth;}
+  body{background:var(--black);color:var(--white);font-family:var(--font-body);font-size:14px;line-height:1.7;overflow-x:hidden;}
+  ::-webkit-scrollbar{width:4px;}::-webkit-scrollbar-track{background:var(--black-2);}::-webkit-scrollbar-thumb{background:var(--green-dim);border-radius:2px;}
+  ::selection{background:var(--green);color:var(--black);}
+  nav{position:fixed;top:0;left:0;right:0;z-index:1000;padding:0 48px;height:68px;display:flex;align-items:center;justify-content:space-between;background:rgba(8,10,8,0.95);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);}
+  .nav-logo{display:flex;align-items:center;gap:10px;text-decoration:none;}
+  .nav-logo svg{height:26px;width:auto;}
+  .nav-back{font-family:var(--font-head);font-weight:700;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--gray);text-decoration:none;display:flex;align-items:center;gap:8px;transition:color .2s;}
+  .nav-back:hover{color:var(--green);}
+  .theme-toggle{width:36px;height:36px;border:1px solid var(--border-dim);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--gray);font-size:16px;transition:border-color .2s,color .2s;}
+  .theme-toggle:hover{border-color:var(--green);color:var(--green);}
+
+  /* PROJECT HERO */
+  .project-hero{padding:120px 48px 60px;position:relative;border-bottom:1px solid var(--border-dim);background:var(--black-2);}
+  .project-hero::before{content:'';position:absolute;inset:0;background-image:linear-gradient(rgba(0,176,79,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(0,176,79,0.04) 1px,transparent 1px);background-size:60px 60px;}
+  .project-cat-tag{display:inline-flex;align-items:center;gap:8px;font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:var(--green);margin-bottom:20px;position:relative;}
+  .project-cat-tag::before{content:'//';color:var(--green-dim);}
+  .project-title{font-family:var(--font-display);font-size:clamp(40px,6vw,88px);line-height:.95;letter-spacing:.02em;color:var(--white);position:relative;max-width:900px;}
+  .project-title span{color:var(--green);}
+  .project-meta-bar{display:flex;gap:48px;flex-wrap:wrap;margin-top:40px;padding-top:32px;border-top:1px solid var(--border-dim);position:relative;}
+  .meta-item{display:flex;flex-direction:column;gap:4px;}
+  .meta-label{font-size:9px;letter-spacing:.22em;text-transform:uppercase;color:var(--green);}
+  .meta-val{font-family:var(--font-head);font-weight:600;font-size:15px;color:var(--white);}
+
+  /* PROJECT IMAGE */
+  .project-image-wrap{width:100%;max-height:560px;overflow:hidden;border-bottom:1px solid var(--border-dim);position:relative;}
+  .project-image-wrap img{width:100%;height:560px;object-fit:cover;display:block;}
+  .project-image-placeholder{width:100%;height:420px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;background:var(--black-3);}
+  .project-image-placeholder .big-icon{font-size:80px;opacity:.12;color:var(--green);}
+  .project-image-placeholder p{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--gray);}
+
+  /* GALLERY */
+  .gallery-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;}
+  .gallery-grid img{width:100%;height:200px;object-fit:cover;cursor:pointer;transition:opacity .2s;}
+  .gallery-grid img:hover{opacity:.8;}
+
+  /* CONTENT */
+  .project-content{display:grid;grid-template-columns:2fr 1fr;gap:64px;padding:80px 48px;align-items:start;}
+  .project-description h2{font-family:var(--font-display);font-size:36px;color:var(--white);margin-bottom:24px;letter-spacing:.03em;}
+  .project-description h2 span{color:var(--green);}
+  .project-description p{font-size:14px;color:var(--gray);line-height:2;margin-bottom:16px;}
+  .project-sidebar{display:flex;flex-direction:column;gap:32px;}
+  .sidebar-card{background:var(--black-2);border:1px solid var(--border-dim);padding:28px;}
+  .sidebar-card h4{font-family:var(--font-head);font-weight:700;font-size:12px;letter-spacing:.15em;text-transform:uppercase;color:var(--green);margin-bottom:16px;}
+  .sidebar-card p,.sidebar-card li{font-size:12px;color:var(--gray);line-height:1.8;}
+  .sidebar-card ul{padding-left:0;list-style:none;display:flex;flex-direction:column;gap:8px;}
+  .sidebar-card li::before{content:'→ ';color:var(--green);}
+  .status-badge{display:inline-flex;align-items:center;gap:6px;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--green);background:var(--green-faint);border:1px solid rgba(0,176,79,0.3);padding:6px 14px;}
+  .status-badge::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--green);}
+
+  /* NEXT/PREV */
+  .project-nav{display:flex;justify-content:space-between;gap:20px;padding:48px;border-top:1px solid var(--border-dim);}
+  .proj-nav-btn{flex:1;background:var(--black-2);border:1px solid var(--border-dim);padding:24px;text-decoration:none;transition:border-color .2s,transform .2s;display:flex;flex-direction:column;gap:8px;}
+  .proj-nav-btn:hover{border-color:var(--green);transform:translateY(-2px);}
+  .proj-nav-btn.next{align-items:flex-end;text-align:right;}
+  .proj-nav-label{font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--green);}
+  .proj-nav-title{font-family:var(--font-head);font-weight:700;font-size:14px;color:var(--white);}
+
+  /* CTA */
+  .project-cta{background:var(--black-2);border-top:1px solid var(--border-dim);padding:80px 48px;text-align:center;}
+  .project-cta h2{font-family:var(--font-display);font-size:clamp(36px,5vw,64px);color:var(--white);margin-bottom:16px;letter-spacing:.03em;}
+  .project-cta h2 span{color:var(--green);}
+  .project-cta p{font-size:14px;color:var(--gray);margin-bottom:40px;}
+  .btn-primary{font-family:var(--font-head);font-weight:700;font-size:13px;letter-spacing:.12em;text-transform:uppercase;background:var(--green);color:var(--black);padding:16px 40px;text-decoration:none;transition:background .2s,transform .2s;display:inline-block;}
+  .btn-primary:hover{background:#00cc5c;transform:translateY(-2px);}
+
+  /* LIGHTBOX */
+  #lightbox{display:none;position:fixed;inset:0;background:rgba(0,0,0,.95);z-index:9999;align-items:center;justify-content:center;}
+  #lightbox.open{display:flex;}
+  #lightbox img{max-width:90vw;max-height:90vh;object-fit:contain;}
+  #lightbox-close{position:absolute;top:24px;right:24px;background:none;border:none;color:var(--white);font-size:32px;cursor:pointer;}
+
+  /* WHATSAPP */
+  .whatsapp-btn{position:fixed;bottom:28px;right:28px;z-index:9000;width:56px;height:56px;border-radius:50%;background:#25D366;display:flex;align-items:center;justify-content:center;text-decoration:none;box-shadow:0 4px 20px rgba(37,211,102,0.4);transition:transform .2s;}
+  .whatsapp-btn:hover{transform:scale(1.1);}
+  .whatsapp-btn svg{width:28px;height:28px;fill:white;}
+
+  @media(max-width:900px){
+    nav{padding:0 24px;}
+    .project-hero{padding:100px 24px 48px;}
+    .project-content{grid-template-columns:1fr;gap:40px;padding:48px 24px;}
+    .project-nav{flex-direction:column;padding:24px;}
+    .project-cta{padding:60px 24px;}
+    .gallery-grid{grid-template-columns:1fr 1fr;}
+    .project-meta-bar{gap:24px;}
+  }
+  @media(max-width:600px){.gallery-grid{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="nav-logo">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 164.48 164.48"><rect width="164.48" height="164.48" rx="43.22" fill="#0f120f"/><polygon fill="#00b04f" points="97.75 55.16 82.08 70.91 82.08 71.13 66.18 55.16 28.49 55.16 28.49 93.08 44.66 109.32 63.42 109.32 39.54 85.32 39.54 66.25 58.47 66.25 81.97 89.86 105.47 66.25 124.94 66.25 124.94 85.78 101.51 109.32 120.27 109.32 135.99 93.53 135.99 55.16 97.75 55.16"/></svg>
+  </a>
+  <a href="index.html#portfolio" class="nav-back">← Back to Portfolio</a>
+  <button class="theme-toggle" id="themeToggle" title="Toggle theme">☀</button>
+</nav>
+
+<div id="projectContent">
+  <div style="display:flex;align-items:center;justify-content:center;min-height:100vh;color:var(--gray);font-size:13px;letter-spacing:.1em;">Loading project...</div>
+</div>
+
+<!-- LIGHTBOX -->
+<div id="lightbox"><button id="lightbox-close">✕</button><img id="lightbox-img" src="" alt=""/></div>
+
+<!-- WHATSAPP -->
+<a href="https://wa.me/2348165592857?text=Hi%20Mechanovia%2C%20I%27d%20like%20to%20discuss%20a%20project." target="_blank" class="whatsapp-btn">
+  <svg viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+</a>
+
+<script>
+  const DEFAULT_PROJECTS=[{id:'p1',title:'Agricultural Seed Planter Mechanism',category:'cad',icon:'⚙',excerpt:'Multi-row precision seed planter designed for small-scale farming, optimized for minimal soil disturbance.',description:'This project involved the full mechanical design of a multi-row seed planter targeted at smallholder farmers. The design focused on achieving consistent seed spacing, minimal soil disturbance, and low manufacturing cost using locally available materials.\n\nKey engineering work included mechanism kinematics, seed metering system design, and structural analysis of the frame under field loading conditions.',tools:'SolidWorks, ANSYS Mechanical',duration:'8 weeks',status:'Completed',image:'',gallery:[]},{id:'p2',title:'Structural FEA of Industrial Bracket',category:'simulation',icon:'◈',excerpt:'Finite element analysis of a load-bearing industrial bracket under dynamic cyclic loading conditions.',description:'A comprehensive structural analysis study of an industrial mounting bracket subjected to dynamic cyclic loads. The FEA work included mesh convergence studies, material property assignment, boundary condition setup, and fatigue life estimation.\n\nResults informed design modifications that improved the factor of safety from 1.4 to 2.3 while reducing material usage by 18%.',tools:'ANSYS Workbench, SolidWorks',duration:'3 weeks',status:'Completed',image:'',gallery:[]},{id:'p3',title:'Automated Sorting Conveyor System',category:'cad',icon:'◉',excerpt:'Modular conveyor with integrated sorting gates, driven by mechanical cam actuation for low-cost automation.',description:'Design of a fully mechanical automated sorting conveyor system for a small manufacturing facility. The system uses cam-follower mechanisms to actuate sorting gates at precise intervals, eliminating the need for electronic controls.',tools:'SolidWorks, AutoCAD',duration:'6 weeks',status:'Completed',image:'',gallery:[]},{id:'p4',title:'Thermal Analysis of Heat Exchanger',category:'simulation',icon:'≋',excerpt:'CFD-informed thermal study of a shell-and-tube heat exchanger to optimize fluid path and surface area.',description:'Thermal and fluid simulation of a shell-and-tube heat exchanger to optimize the internal baffle configuration and tube bundle arrangement. Optimization resulted in a 22% improvement in heat transfer efficiency.',tools:'ANSYS Fluent, SolidWorks',duration:'4 weeks',status:'Completed',image:'',gallery:[]},{id:'p5',title:'Modular Hydroponic Frame System',category:'product',icon:'⬡',excerpt:'Stackable hydroponic growing frame engineered for structural stability and cost-effective fabrication.',description:'Full product development of a stackable modular hydroponic growing frame for urban agriculture. Designed for ease of assembly, structural stability under full load, and compatibility with standard PVC piping.',tools:'SolidWorks, AutoCAD, ANSYS',duration:'10 weeks',status:'Completed',image:'',gallery:[]},{id:'p6',title:'Soil Tillage Attachment Design',category:'research',icon:'∿',excerpt:'Research-driven design of a sub-surface tillage attachment for two-wheel tractors.',description:'A research-based project developing a sub-surface tillage attachment for two-wheel power tillers. The study combined agricultural soil mechanics with practical mechanical design to produce a working attachment specification.',tools:'SolidWorks, MATLAB, AutoCAD',duration:'12 weeks',status:'Completed',image:'',gallery:[]}];
+  const CAT_LABEL={cad:'CAD Design',simulation:'Simulation',product:'Product Dev',research:'Research'};
+  const CAT_BG={cad:'linear-gradient(135deg,#0a140a,#0f2a15)',simulation:'linear-gradient(135deg,#0a0f14,#0a1f2a)',product:'linear-gradient(135deg,#14100a,#2a1f0a)',research:'linear-gradient(135deg,#0f0a14,#1a0a2a)'};
+
+  function getProjects(){try{const d=localStorage.getItem('mech_projects');return d?JSON.parse(d):DEFAULT_PROJECTS;}catch(e){return DEFAULT_PROJECTS;}}
+
+  function getParam(k){return new URLSearchParams(window.location.search).get(k);}
+
+  function render(){
+    const id=getParam('id');
+    const projects=getProjects();
+    const idx=projects.findIndex(p=>p.id===id);
+    if(idx===-1){document.getElementById('projectContent').innerHTML='<div style="text-align:center;padding:120px 48px;"><h2 style="font-family:var(--font-display);color:var(--white);font-size:64px;">Project Not Found</h2><a href="index.html#portfolio" style="color:var(--green);font-family:var(--font-head);font-size:13px;letter-spacing:.1em;text-transform:uppercase;">← Back to Portfolio</a></div>';return;}
+    const p=projects[idx];
+    const prev=projects[idx-1];
+    const next=projects[idx+1];
+    document.title=`${p.title} — Mechanovia`;
+    const gallery=p.gallery&&p.gallery.length?`<div style="padding:0 48px 48px;"><p style="font-family:var(--font-head);font-weight:700;font-size:12px;letter-spacing:.15em;text-transform:uppercase;color:var(--green);margin-bottom:16px;">Project Gallery</p><div class="gallery-grid">${p.gallery.map(src=>`<img src="${src}" alt="Gallery" onclick="openLightbox('${src}')">`).join('')}</div></div>`:'';
+    const desc=p.description.split('\n\n').map(para=>`<p>${para}</p>`).join('');
+    document.getElementById('projectContent').innerHTML=`
+      <div class="project-hero">
+        <p class="project-cat-tag">${CAT_LABEL[p.category]||p.category}</p>
+        <h1 class="project-title">${p.title}</h1>
+        <div class="project-meta-bar">
+          <div class="meta-item"><span class="meta-label">Tools Used</span><span class="meta-val">${p.tools||'—'}</span></div>
+          <div class="meta-item"><span class="meta-label">Duration</span><span class="meta-val">${p.duration||'—'}</span></div>
+          <div class="meta-item"><span class="meta-label">Category</span><span class="meta-val">${CAT_LABEL[p.category]||p.category}</span></div>
+          <div class="meta-item"><span class="meta-label">Status</span><span class="status-badge">${p.status||'Completed'}</span></div>
+        </div>
+      </div>
+      <div class="project-image-wrap">
+        ${p.image?`<img src="${p.image}" alt="${p.title}"/>`:`<div class="project-image-placeholder" style="background:${CAT_BG[p.category]||CAT_BG.cad};"><span class="big-icon">${p.icon||'⚙'}</span><p>Project image — add via admin panel</p></div>`}
+      </div>
+      ${gallery}
+      <div class="project-content">
+        <div class="project-description">
+          <h2>Project <span>Overview.</span></h2>
+          ${desc}
+        </div>
+        <div class="project-sidebar">
+          <div class="sidebar-card">
+            <h4>Engineering Tools</h4>
+            <ul>${(p.tools||'').split(',').map(t=>`<li>${t.trim()}</li>`).join('')}</ul>
+          </div>
+          <div class="sidebar-card">
+            <h4>Project Details</h4>
+            <ul>
+              <li>Duration: ${p.duration||'—'}</li>
+              <li>Category: ${CAT_LABEL[p.category]||p.category}</li>
+              <li>Status: ${p.status||'Completed'}</li>
+            </ul>
+          </div>
+          <div class="sidebar-card">
+            <h4>Interested in similar work?</h4>
+            <p style="margin-bottom:16px;">Let's discuss your engineering challenge.</p>
+            <a href="index.html#contact" class="btn-primary" style="font-size:11px;padding:12px 20px;">Start a Project</a>
+          </div>
+        </div>
+      </div>
+      <div class="project-nav">
+        ${prev?`<a class="proj-nav-btn" href="project.html?id=${prev.id}"><span class="proj-nav-label">← Previous Project</span><span class="proj-nav-title">${prev.title}</span></a>`:`<div></div>`}
+        ${next?`<a class="proj-nav-btn next" href="project.html?id=${next.id}"><span class="proj-nav-label">Next Project →</span><span class="proj-nav-title">${next.title}</span></a>`:`<div></div>`}
+      </div>
+      <div class="project-cta">
+        <h2>Have a Similar <span>Challenge?</span></h2>
+        <p>Mechanovia specialises in turning engineering problems into practical, manufacturable solutions.</p>
+        <a href="index.html#contact" class="btn-primary">Start a Conversation</a>
+      </div>`;
+  }
+
+  function openLightbox(src){document.getElementById('lightbox-img').src=src;document.getElementById('lightbox').classList.add('open');}
+  document.getElementById('lightbox-close').addEventListener('click',()=>document.getElementById('lightbox').classList.remove('open'));
+  document.getElementById('lightbox').addEventListener('click',function(e){if(e.target===this)this.classList.remove('open');});
+
+  const themeToggle=document.getElementById('themeToggle');
+  if(localStorage.getItem('mechanovia-theme')==='light'){document.body.classList.add('light-mode');themeToggle.textContent='☾';}
+  themeToggle.addEventListener('click',()=>{document.body.classList.toggle('light-mode');const isLight=document.body.classList.contains('light-mode');themeToggle.textContent=isLight?'☾':'☀';localStorage.setItem('mechanovia-theme',isLight?'light':'dark');});
+
+  render();
+</script>
+</body>
+</html>

@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Admin Panel — Mechanovia</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=DM+Mono:wght@300;400;500&family=Bebas+Neue&display=swap" rel="stylesheet"/>
+<style>
+  :root{--black:#080a08;--black-2:#0f120f;--black-3:#161a16;--black-4:#1e231e;--green:#00b04f;--green-dim:#008c3e;--green-faint:rgba(0,176,79,0.06);--white:#f0f2f0;--gray:#8a9a8a;--gray-dim:#4a5a4a;--red:#cc3300;--amber:#ffaa00;--border:rgba(0,176,79,0.18);--border-dim:rgba(255,255,255,0.08);--font-display:'Bebas Neue',sans-serif;--font-head:'Rajdhani',sans-serif;--font-body:'DM Mono',monospace;}
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+  html{scroll-behavior:smooth;}
+  body{background:var(--black);color:var(--white);font-family:var(--font-body);font-size:13px;line-height:1.7;min-height:100vh;}
+  ::-webkit-scrollbar{width:4px;}::-webkit-scrollbar-thumb{background:var(--green-dim);}
+  ::selection{background:var(--green);color:var(--black);}
+
+  /* ── LOGIN ── */
+  #loginScreen{position:fixed;inset:0;background:var(--black);z-index:9999;display:flex;align-items:center;justify-content:center;background-image:linear-gradient(rgba(0,176,79,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(0,176,79,0.04) 1px,transparent 1px);background-size:60px 60px;}
+  .login-box{background:var(--black-2);border:1px solid var(--border);padding:56px 48px;width:100%;max-width:400px;text-align:center;position:relative;z-index:1;}
+  .login-logo{width:60px;height:60px;margin:0 auto 24px;}
+  .login-box h2{font-family:var(--font-display);font-size:40px;color:var(--white);letter-spacing:.05em;margin-bottom:6px;}
+  .login-box .sub{font-size:10px;color:var(--gray);letter-spacing:.2em;text-transform:uppercase;margin-bottom:36px;}
+  .login-field{width:100%;background:var(--black-3);border:1px solid var(--border-dim);color:var(--white);padding:14px 16px;font-family:var(--font-body);font-size:13px;outline:none;margin-bottom:12px;transition:border-color .2s;}
+  .login-field:focus{border-color:var(--green);}
+  .login-btn{width:100%;background:var(--green);color:var(--black);font-family:var(--font-head);font-weight:700;font-size:14px;letter-spacing:.12em;text-transform:uppercase;padding:14px;border:none;cursor:pointer;transition:background .2s;}
+  .login-btn:hover{background:#00cc5c;}
+  .login-error{color:var(--red);font-size:11px;letter-spacing:.08em;margin-top:12px;min-height:18px;}
+  .login-hint{font-size:10px;color:var(--gray-dim);margin-top:20px;letter-spacing:.06em;}
+
+  /* ── APP LAYOUT ── */
+  #adminApp{display:none;min-height:100vh;}
+  .sidebar{position:fixed;top:0;left:0;bottom:0;width:220px;background:var(--black-2);border-right:1px solid var(--border-dim);display:flex;flex-direction:column;z-index:100;overflow-y:auto;}
+  .sidebar-brand{padding:20px;border-bottom:1px solid var(--border-dim);display:flex;align-items:center;gap:10px;}
+  .sidebar-brand svg{width:34px;height:34px;flex-shrink:0;}
+  .brand-name{font-family:var(--font-display);font-size:18px;color:var(--white);line-height:1;}
+  .brand-sub{font-size:8px;letter-spacing:.15em;color:var(--green);text-transform:uppercase;}
+  .sidebar-section{padding:12px 0;}
+  .sidebar-label{font-size:8px;letter-spacing:.2em;text-transform:uppercase;color:var(--gray-dim);padding:8px 20px 4px;}
+  .nav-item{display:flex;align-items:center;gap:10px;padding:10px 20px;font-family:var(--font-head);font-weight:600;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--gray);cursor:pointer;transition:color .2s,background .2s;border-left:2px solid transparent;user-select:none;}
+  .nav-item:hover{color:var(--white);background:var(--black-3);}
+  .nav-item.active{color:var(--white);background:var(--black-3);border-left-color:var(--green);}
+  .nav-item .ni{width:16px;text-align:center;font-size:14px;}
+  .sidebar-footer{margin-top:auto;padding:16px 20px;border-top:1px solid var(--border-dim);display:flex;flex-direction:column;gap:10px;}
+  .sf-link{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--gray);text-decoration:none;display:flex;align-items:center;gap:6px;transition:color .2s;}
+  .sf-link:hover{color:var(--green);}
+  .sf-logout{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--gray);background:none;border:none;cursor:pointer;font-family:var(--font-body);display:flex;align-items:center;gap:6px;transition:color .2s;padding:0;}
+  .sf-logout:hover{color:var(--red);}
+
+  .main{margin-left:220px;padding:36px 40px;min-height:100vh;}
+  .page-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:32px;padding-bottom:20px;border-bottom:1px solid var(--border-dim);}
+  .page-title{font-family:var(--font-display);font-size:42px;color:var(--white);letter-spacing:.03em;line-height:1;}
+  .page-title span{color:var(--green);}
+
+  /* ── PANELS ── */
+  .panel{display:none;}
+  .panel.active{display:block;}
+
+  /* ── STAT CARDS ── */
+  .stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:32px;}
+  .stat-card{background:var(--black-2);border:1px solid var(--border-dim);padding:20px;position:relative;overflow:hidden;}
+  .stat-card::before{content:'';position:absolute;top:0;left:0;width:2px;height:100%;background:var(--green);}
+  .stat-num{font-family:var(--font-display);font-size:38px;color:var(--green);line-height:1;}
+  .stat-lbl{font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--gray);margin-top:4px;}
+
+  /* ── BUTTONS ── */
+  .btn{font-family:var(--font-head);font-weight:700;font-size:11px;letter-spacing:.12em;text-transform:uppercase;padding:9px 22px;border:none;cursor:pointer;transition:all .2s;display:inline-flex;align-items:center;gap:7px;}
+  .btn-green{background:var(--green);color:var(--black);}
+  .btn-green:hover{background:#00cc5c;}
+  .btn-gray{background:transparent;color:var(--gray);border:1px solid var(--border-dim);}
+  .btn-gray:hover{border-color:var(--green);color:var(--green);}
+  .btn-red{background:transparent;color:var(--red);border:1px solid rgba(204,51,0,.25);}
+  .btn-red:hover{background:rgba(204,51,0,.1);}
+  .btn-amber{background:transparent;color:var(--amber);border:1px solid rgba(255,170,0,.25);}
+  .btn-amber:hover{background:rgba(255,170,0,.1);}
+  .btn-sm{padding:6px 14px;font-size:10px;}
+
+  /* ── CARDS / ROWS ── */
+  .card{background:var(--black-2);border:1px solid var(--border-dim);padding:28px;}
+  .card-title{font-family:var(--font-head);font-weight:700;font-size:13px;letter-spacing:.15em;text-transform:uppercase;color:var(--green);margin-bottom:20px;display:flex;align-items:center;gap:8px;}
+  .list-row{background:var(--black-3);border:1px solid var(--border-dim);padding:16px 20px;display:flex;align-items:center;gap:16px;transition:border-color .2s;margin-bottom:8px;}
+  .list-row:hover{border-color:rgba(0,176,79,.3);}
+  .list-row:last-child{margin-bottom:0;}
+  .row-thumb{width:56px;height:44px;background:var(--black-4);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;overflow:hidden;}
+  .row-thumb img{width:100%;height:100%;object-fit:cover;}
+  .row-info{flex:1;min-width:0;}
+  .row-title{font-family:var(--font-head);font-weight:700;font-size:13px;color:var(--white);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .row-meta{font-size:10px;color:var(--gray);margin-top:2px;}
+  .cat-tag{font-size:8px;letter-spacing:.15em;text-transform:uppercase;padding:3px 9px;background:var(--green-faint);border:1px solid rgba(0,176,79,.25);color:var(--green);flex-shrink:0;}
+  .row-actions{display:flex;gap:6px;flex-shrink:0;}
+  .empty-state{text-align:center;padding:60px 24px;color:var(--gray);}
+  .empty-icon{font-size:40px;opacity:.15;margin-bottom:12px;}
+  .empty-state p{font-size:10px;letter-spacing:.14em;text-transform:uppercase;margin-bottom:20px;}
+
+  /* ── FORMS ── */
+  .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  .fg{display:flex;flex-direction:column;gap:7px;}
+  .fg.full{grid-column:1/-1;}
+  .fg label{font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--green);}
+  .fg input,.fg select,.fg textarea{background:var(--black-3);border:1px solid var(--border-dim);color:var(--white);padding:10px 13px;font-family:var(--font-body);font-size:12px;outline:none;transition:border-color .2s;resize:vertical;-webkit-appearance:none;width:100%;}
+  .fg input:focus,.fg select:focus,.fg textarea:focus{border-color:var(--green);}
+  .fg select option{background:var(--black-3);}
+  .fg .hint{font-size:9px;color:var(--gray-dim);letter-spacing:.05em;margin-top:3px;}
+  .fg .img-preview-small{width:100%;height:100px;object-fit:cover;margin-top:8px;border:1px solid var(--border-dim);}
+
+  /* ── MODAL ── */
+  #modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:9000;align-items:flex-start;justify-content:center;overflow-y:auto;padding:32px 16px;}
+  #modal.open{display:flex;}
+  .modal-box{background:var(--black-2);border:1px solid var(--border);width:100%;max-width:700px;padding:36px;position:relative;margin:auto;}
+  .modal-h{font-family:var(--font-display);font-size:34px;color:var(--white);letter-spacing:.03em;margin-bottom:28px;}
+  .modal-h span{color:var(--green);}
+  .modal-x{position:absolute;top:16px;right:16px;background:none;border:none;color:var(--gray);font-size:22px;cursor:pointer;}
+  .modal-x:hover{color:var(--white);}
+  .modal-footer{display:flex;gap:10px;margin-top:24px;padding-top:20px;border-top:1px solid var(--border-dim);}
+
+  /* ── SETTINGS SECTIONS ── */
+  .settings-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;}
+  .settings-grid .full{grid-column:1/-1;}
+  .setting-row{display:flex;justify-content:space-between;align-items:center;padding:14px 0;border-bottom:1px solid var(--border-dim);}
+  .setting-row:last-child{border-bottom:none;}
+  .setting-label{font-family:var(--font-head);font-weight:600;font-size:13px;color:var(--white);}
+  .setting-desc{font-size:10px;color:var(--gray);margin-top:2px;}
+  .setting-val{font-size:12px;color:var(--gray);font-family:var(--font-body);}
+
+  /* ── TOAST ── */
+  #toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%);background:var(--green);color:var(--black);font-family:var(--font-head);font-weight:700;font-size:11px;letter-spacing:.12em;text-transform:uppercase;padding:12px 28px;opacity:0;pointer-events:none;transition:opacity .3s;z-index:99999;white-space:nowrap;}
+  #toast.show{opacity:1;}
+  #toast.error{background:var(--red);color:var(--white);}
+
+  /* ── RESPONSIVE ── */
+  @media(max-width:800px){
+    .sidebar{display:none;}
+    .main{margin-left:0;padding:20px 16px;}
+    .stats-grid{grid-template-columns:1fr 1fr;}
+    .form-grid,.settings-grid{grid-template-columns:1fr;}
+    .fg.full{grid-column:1;}
+    .settings-grid .full{grid-column:1;}
+  }
+</style>
+</head>
+<body>
+
+<!-- ══ LOGIN ══ -->
+<div id="loginScreen">
+  <div class="login-box">
+    <svg class="login-logo" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 164.48 164.48">
+      <rect width="164.48" height="164.48" rx="43.22" fill="#0f120f"/>
+      <polygon fill="#00b04f" points="97.75 55.16 82.08 70.91 82.08 71.13 66.18 55.16 28.49 55.16 28.49 93.08 44.66 109.32 63.42 109.32 39.54 85.32 39.54 66.25 58.47 66.25 81.97 89.86 105.47 66.25 124.94 66.25 124.94 85.78 101.51 109.32 120.27 109.32 135.99 93.53 135.99 55.16 97.75 55.16"/>
+    </svg>
+    <h2>Admin Panel</h2>
+    <p class="sub">Mechanovia — Secure Access</p>
+    <input class="login-field" type="text" id="loginUser" placeholder="Username" autocomplete="username"/>
+    <input class="login-field" type="password" id="loginPass" placeholder="Password" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()"/>
+    <button class="login-btn" onclick="doLogin()">Login →</button>
+    <p class="login-error" id="loginError"></p>
+    <p class="login-hint">Default — user: <strong>mechanovia</strong> &nbsp;|&nbsp; pass: <strong>Admin2025!</strong></p>
+  </div>
+</div>
+
+<!-- ══ ADMIN APP ══ -->
+<div id="adminApp">
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="sidebar-brand">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 164.48 164.48"><rect width="164.48" height="164.48" rx="43.22" fill="#0f120f"/><polygon fill="#00b04f" points="97.75 55.16 82.08 70.91 82.08 71.13 66.18 55.16 28.49 55.16 28.49 93.08 44.66 109.32 63.42 109.32 39.54 85.32 39.54 66.25 58.47 66.25 81.97 89.86 105.47 66.25 124.94 66.25 124.94 85.78 101.51 109.32 120.27 109.32 135.99 93.53 135.99 55.16 97.75 55.16"/></svg>
+      <div><div class="brand-name">Mechanovia</div><div class="brand-sub">Admin Panel</div></div>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-label">Main</div>
+      <div class="nav-item active" onclick="go('dashboard')"><span class="ni">⊞</span> Dashboard</div>
+      <div class="nav-item" onclick="go('projects')"><span class="ni">◈</span> Projects</div>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-label">Site Content</div>
+      <div class="nav-item" onclick="go('hero')"><span class="ni">★</span> Hero Section</div>
+      <div class="nav-item" onclick="go('about')"><span class="ni">◎</span> About & Profile</div>
+      <div class="nav-item" onclick="go('services')"><span class="ni">⚙</span> Services</div>
+      <div class="nav-item" onclick="go('testimonials')"><span class="ni">❝</span> Testimonials</div>
+      <div class="nav-item" onclick="go('blog')"><span class="ni">✎</span> Blog / Notes</div>
+      <div class="nav-item" onclick="go('showreel')"><span class="ni">▶</span> Showreel</div>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-label">System</div>
+      <div class="nav-item" onclick="go('credentials')"><span class="ni">🔒</span> Login & Password</div>
+      <div class="nav-item" onclick="go('data')"><span class="ni">⬡</span> Data & Backup</div>
+    </div>
+
+    <div class="sidebar-footer">
+      <a class="sf-link" href="index.html" target="_blank">↗ View Live Site</a>
+      <button class="sf-logout" onclick="doLogout()">⊗ Logout</button>
+    </div>
+  </div>
+
+  <!-- MAIN CONTENT -->
+  <div class="main">
+
+    <!-- ── DASHBOARD ── -->
+    <div class="panel active" id="panel-dashboard">
+      <div class="page-header">
+        <h1 class="page-title">Dashboard <span>Overview.</span></h1>
+        <button class="btn btn-green" onclick="go('projects');openProjectModal()">+ New Project</button>
+      </div>
+      <div class="stats-grid" id="statsGrid"></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
+        <div class="card"><div class="card-title">◈ Recent Projects</div><div id="dashProjects"></div></div>
+        <div class="card"><div class="card-title">✎ Recent Blog Posts</div><div id="dashBlog"></div></div>
+      </div>
+    </div>
+
+    <!-- ── PROJECTS ── -->
+    <div class="panel" id="panel-projects">
+      <div class="page-header">
+        <h1 class="page-title">All <span>Projects.</span></h1>
+        <button class="btn btn-green" onclick="openProjectModal()">+ Add Project</button>
+      </div>
+      <div id="projectList"></div>
+    </div>
+
+    <!-- ── HERO ── -->
+    <div class="panel" id="panel-hero">
+      <div class="page-header"><h1 class="page-title">Hero <span>Section.</span></h1><button class="btn btn-green" onclick="saveHero()">✓ Save Changes</button></div>
+      <div class="card">
+        <div class="card-title">★ Hero Content</div>
+        <div class="form-grid">
+          <div class="fg full"><label>Tagline (small text above heading)</label><input id="h_tag" type="text" placeholder="e.g. Mechanical Engineering Brand"/></div>
+          <div class="fg full"><label>Heading Line 1</label><input id="h_line1" type="text" placeholder="e.g. Engineering"/></div>
+          <div class="fg full"><label>Heading Line 2</label><input id="h_line2" type="text" placeholder="e.g. Innovation"/></div>
+          <div class="fg full"><label>Heading Line 3 (green accent)</label><input id="h_line3" type="text" placeholder="e.g. By Design."/></div>
+          <div class="fg full"><label>Subheading paragraph</label><textarea id="h_sub" rows="3" placeholder="One or two sentences describing Mechanovia..."></textarea></div>
+          <div class="fg"><label>Stat 1 — Number</label><input id="h_s1n" type="number" placeholder="12"/></div>
+          <div class="fg"><label>Stat 1 — Label</label><input id="h_s1l" type="text" placeholder="Projects Completed"/></div>
+          <div class="fg"><label>Stat 2 — Number</label><input id="h_s2n" type="number" placeholder="5"/></div>
+          <div class="fg"><label>Stat 2 — Label</label><input id="h_s2l" type="text" placeholder="Core Disciplines"/></div>
+          <div class="fg"><label>Stat 3 — Number</label><input id="h_s3n" type="number" placeholder="3"/></div>
+          <div class="fg"><label>Stat 3 — Label</label><input id="h_s3l" type="text" placeholder="Simulation Tools"/></div>
+          <div class="fg"><label>Stat 4 — Number</label><input id="h_s4n" type="number" placeholder="100"/></div>
+          <div class="fg"><label>Stat 4 — Label</label><input id="h_s4l" type="text" placeholder="Practical Focus"/></div>
+          <div class="fg full"><label>CV / Resume File URL <span style="color:var(--gray);font-size:9px;">(upload to GitHub → /files/ folder, paste path here)</span></label><input id="h_cv" type="text" placeholder="files/mechanovia-cv.pdf"/></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── ABOUT ── -->
+    <div class="panel" id="panel-about">
+      <div class="page-header"><h1 class="page-title">About & <span>Profile.</span></h1><button class="btn btn-green" onclick="saveAbout()">✓ Save Changes</button></div>
+      <div class="card">
+        <div class="card-title">◎ Profile Information</div>
+        <div class="form-grid">
+          <div class="fg full">
+            <label>Profile Photo URL <span style="color:var(--gray);font-size:9px;">(upload to GitHub → /images/ folder, paste path here)</span></label>
+            <input id="a_photo" type="text" placeholder="images/profile.jpg"/>
+            <span class="hint">Leave blank to show placeholder. GitHub path example: images/my-photo.jpg</span>
+            <img id="a_photoPreview" class="img-preview-small" src="" alt="" style="display:none;"/>
+          </div>
+          <div class="fg"><label>Display Name</label><input id="a_name" type="text" placeholder="e.g. Dominic Okoye"/></div>
+          <div class="fg"><label>Title / Role</label><input id="a_title" type="text" placeholder="e.g. Mechanical Engineer & Design Innovator"/></div>
+          <div class="fg full"><label>Bio Paragraph 1</label><textarea id="a_bio1" rows="3" placeholder="First paragraph about yourself and Mechanovia..."></textarea></div>
+          <div class="fg full"><label>Bio Paragraph 2</label><textarea id="a_bio2" rows="3" placeholder="Second paragraph — your approach, focus areas..."></textarea></div>
+          <div class="fg full"><label>Bio Paragraph 3 (optional)</label><textarea id="a_bio3" rows="2" placeholder="Third paragraph — optional additional context..."></textarea></div>
+          <div class="fg full" style="border-top:1px solid var(--border-dim);padding-top:20px;margin-top:8px;">
+            <div class="card-title" style="margin-bottom:16px;">Contact & Social Links</div>
+          </div>
+          <div class="fg"><label>Email Address</label><input id="a_email" type="email" placeholder="mechanovia@gmail.com"/></div>
+          <div class="fg"><label>WhatsApp Number <span style="color:var(--gray);font-size:9px;">(with country code, no +)</span></label><input id="a_whatsapp" type="text" placeholder="2348165592857"/></div>
+          <div class="fg"><label>YouTube URL</label><input id="a_yt" type="text" placeholder="https://www.youtube.com/@mechanovia"/></div>
+          <div class="fg"><label>Twitter / X URL</label><input id="a_tw" type="text" placeholder="https://x.com/Mechanovia_"/></div>
+          <div class="fg"><label>LinkedIn URL</label><input id="a_li" type="text" placeholder="https://www.linkedin.com/company/mechanovia/"/></div>
+          <div class="fg"><label>Instagram URL</label><input id="a_ig" type="text" placeholder="https://www.instagram.com/heisdominics"/></div>
+          <div class="fg"><label>TikTok URL</label><input id="a_tt" type="text" placeholder="https://www.tiktok.com/@mechanovia"/></div>
+          <div class="fg"><label>Location (optional)</label><input id="a_location" type="text" placeholder="e.g. Lagos, Nigeria"/></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── SERVICES ── -->
+    <div class="panel" id="panel-services">
+      <div class="page-header"><h1 class="page-title">Services & <span>Capabilities.</span></h1><button class="btn btn-green" onclick="openServiceModal()">+ Add Service</button></div>
+      <p style="color:var(--gray);font-size:12px;margin-bottom:24px;">These cards appear in the Services section on the homepage. Drag to reorder (coming soon).</p>
+      <div id="serviceList"></div>
+    </div>
+
+    <!-- ── TESTIMONIALS ── -->
+    <div class="panel" id="panel-testimonials">
+      <div class="page-header"><h1 class="page-title">Testimonials & <span>Reviews.</span></h1><button class="btn btn-green" onclick="openTestimonialModal()">+ Add Testimonial</button></div>
+      <div id="testimonialList"></div>
+    </div>
+
+    <!-- ── BLOG ── -->
+    <div class="panel" id="panel-blog">
+      <div class="page-header"><h1 class="page-title">Blog / <span>Notes.</span></h1><button class="btn btn-green" onclick="openBlogModal()">+ Add Post</button></div>
+      <div id="blogList"></div>
+    </div>
+
+    <!-- ── SHOWREEL ── -->
+    <div class="panel" id="panel-showreel">
+      <div class="page-header"><h1 class="page-title">YouTube <span>Showreel.</span></h1><button class="btn btn-green" onclick="saveShowreel()">✓ Save Changes</button></div>
+      <div class="card" style="max-width:600px;">
+        <div class="card-title">▶ Video Settings</div>
+        <div class="fg" style="margin-bottom:16px;">
+          <label>YouTube Embed URL</label>
+          <input id="sr_url" type="text" placeholder="https://www.youtube.com/embed/VIDEO_ID"/>
+          <span class="hint">Go to your YouTube video → Share → Embed → copy only the src URL (starts with https://www.youtube.com/embed/...)</span>
+        </div>
+        <div class="fg" style="margin-bottom:16px;">
+          <label>Section Heading</label>
+          <input id="sr_heading" type="text" placeholder="Engineering Showreel."/>
+        </div>
+        <div class="fg">
+          <label>Section Description</label>
+          <textarea id="sr_desc" rows="2" placeholder="Short description shown above the video..."></textarea>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── CREDENTIALS ── -->
+    <div class="panel" id="panel-credentials">
+      <div class="page-header"><h1 class="page-title">Login & <span>Password.</span></h1></div>
+      <div style="max-width:520px;display:flex;flex-direction:column;gap:20px;">
+        <div class="card">
+          <div class="card-title">🔒 Change Username</div>
+          <div class="fg" style="margin-bottom:14px;"><label>Current Username</label><input type="text" id="c_currUser" placeholder="Enter current username"/></div>
+          <div class="fg" style="margin-bottom:14px;"><label>New Username</label><input type="text" id="c_newUser" placeholder="Enter new username"/></div>
+          <button class="btn btn-green" onclick="changeUsername()">Update Username</button>
+        </div>
+        <div class="card">
+          <div class="card-title">🔒 Change Password</div>
+          <div class="fg" style="margin-bottom:14px;"><label>Current Password</label><input type="password" id="c_currPass" placeholder="Enter current password"/></div>
+          <div class="fg" style="margin-bottom:14px;"><label>New Password (min 8 characters)</label><input type="password" id="c_newPass" placeholder="Enter new password"/></div>
+          <div class="fg" style="margin-bottom:20px;"><label>Confirm New Password</label><input type="password" id="c_confPass" placeholder="Repeat new password"/></div>
+          <button class="btn btn-green" onclick="changePassword()">Update Password</button>
+        </div>
+        <div class="card">
+          <div class="card-title">ℹ Current Credentials</div>
+          <div class="setting-row"><div><div class="setting-label">Username</div><div class="setting-desc">Used to log into this admin panel</div></div><div class="setting-val" id="showUsername">—</div></div>
+          <div class="setting-row"><div><div class="setting-label">Password</div><div class="setting-desc">Stored locally in this browser</div></div><div class="setting-val">••••••••</div></div>
+          <p style="font-size:10px;color:var(--gray-dim);margin-top:12px;line-height:1.7;">Note: Credentials are stored in your browser's localStorage. If you clear browser data, they reset to defaults. Keep a note of your credentials somewhere safe.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── DATA ── -->
+    <div class="panel" id="panel-data">
+      <div class="page-header"><h1 class="page-title">Data & <span>Backup.</span></h1></div>
+      <div style="max-width:560px;display:flex;flex-direction:column;gap:20px;">
+        <div class="card">
+          <div class="card-title">⬡ Export All Data</div>
+          <p style="color:var(--gray);font-size:12px;line-height:1.8;margin-bottom:20px;">Download a complete backup of all your projects, blog posts, services, testimonials, and site settings as a JSON file.</p>
+          <button class="btn btn-green" onclick="exportAll()">↓ Download Full Backup</button>
+        </div>
+        <div class="card">
+          <div class="card-title">⬡ Import Data</div>
+          <p style="color:var(--gray);font-size:12px;line-height:1.8;margin-bottom:20px;">Restore from a previously exported backup JSON file. This will overwrite all current data.</p>
+          <input type="file" id="importFile" accept=".json" style="display:none;" onchange="importData(event)"/>
+          <button class="btn btn-amber" onclick="document.getElementById('importFile').click()">↑ Import Backup</button>
+        </div>
+        <div class="card">
+          <div class="card-title" style="color:var(--red);">⚠ Danger Zone</div>
+          <p style="color:var(--gray);font-size:12px;line-height:1.8;margin-bottom:20px;">Reset all site content to factory defaults. This will permanently delete all your projects, posts, and settings.</p>
+          <button class="btn btn-red" onclick="resetAll()">Reset All Data to Defaults</button>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /main -->
+</div><!-- /adminApp -->
+
+<!-- ══ PROJECT MODAL ══ -->
+<div id="modal">
+  <div class="modal-box" id="modalBox">
+    <button class="modal-x" onclick="closeModal()">✕</button>
+    <div id="modalBody"></div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+/* ══════════════════════════════════════════════════
+   DEFAULTS
+══════════════════════════════════════════════════ */
+const DEF_CREDS = { username: 'mechanovia', password: 'Admin2025!' };
+
+const DEF_HERO = { tag:'Mechanical Engineering Brand', line1:'Engineering', line2:'Innovation', line3:'By Design.', sub:'Transforming complex engineering challenges into efficient, manufacturable, and intelligent mechanical systems — through advanced design, simulation, and prototype development.', s1n:12, s1l:'Projects Completed', s2n:5, s2l:'Core Disciplines', s3n:3, s3l:'Simulation Tools', s4n:100, s4l:'Practical Focus', cv:'files/mechanovia-cv.pdf' };
+
+const DEF_ABOUT = { photo:'', name:'Mechanovia', title:'Mechanical Engineer & Design Innovator', bio1:'A mechanical engineering brand built on one belief — ideas should become real things. Combining engineering precision with creative problem-solving to deliver systems that are technically sound, manufacturable, and built to last.', bio2:'Mechanovia bridges the gap between engineering imagination and practical execution — turning complex challenges into intelligent mechanical systems ready for the real world.', bio3:'', email:'mechanovia@gmail.com', whatsapp:'2348165592857', yt:'https://www.youtube.com/@mechanovia', tw:'https://x.com/Mechanovia_', li:'https://www.linkedin.com/company/mechanovia/', ig:'https://www.instagram.com/heisdominics', tt:'https://www.tiktok.com/@mechanovia', location:'Lagos, Nigeria' };
+
+const DEF_SHOWREEL = { url:'', heading:'Engineering Showreel.', desc:"See Mechanovia's engineering process and projects in action on our YouTube channel." };
+
+const DEF_SERVICES = [
+  {id:'s1',icon:'⚙',title:'Mechanical Design',desc:'From concept sketches to detailed CAD models engineered for fabrication. Every component designed for function, fit, and manufacturability.'},
+  {id:'s2',icon:'◈',title:'CAE Simulation',desc:'Structural, thermal, and dynamic performance analysis using industry-grade tools. Validate designs before a single part is machined.'},
+  {id:'s3',icon:'◎',title:'Product Development',desc:'End-to-end engineering from ideation through design iteration to a prototype-ready deliverable — technical and market-aware.'},
+  {id:'s4',icon:'≋',title:'System Optimization',desc:'Improving efficiency, durability, and manufacturability of existing mechanical systems through data-driven engineering decisions.'},
+  {id:'s5',icon:'⬡',title:'Prototype Planning',desc:'Comprehensive technical documentation, BOMs, and fabrication plans to bridge the gap between digital design and physical prototype.'},
+  {id:'s6',icon:'∿',title:'Applied Research',desc:'Engineering research that connects academic rigor with real-world constraints — producing findings that can actually be built and tested.'}
+];
+
+const DEF_TESTIMONIALS = [
+  {id:'t1',quote:'An exceptionally detailed and well-structured engineering approach. The CAD models were precise, simulation results clearly communicated, and the final design exceeded our expectations.',name:'Add Name Here',role:'Role / Organisation',avatar:''},
+  {id:'t2',quote:'Mechanovia brings a rare combination of creative thinking and engineering discipline. The solution was not only functional but manufacturable with our existing equipment.',name:'Add Name Here',role:'Role / Organisation',avatar:''},
+  {id:'t3',quote:'The simulation analysis provided insights that saved us significant rework costs. Mechanovia\'s methodology is rigorous, practical, and genuinely useful in the real world.',name:'Add Name Here',role:'Role / Organisation',avatar:''}
+];
+
+const DEF_BLOG = [
+  {id:'b1',tag:'CAD Design',title:'Why Parametric Modelling Changes Everything',excerpt:'A look at how parametric CAD workflows speed up design iteration and reduce costly errors before fabrication begins.',date:'',url:'#'},
+  {id:'b2',tag:'Simulation',title:'Understanding FEA Results: What Engineers Get Wrong',excerpt:'Common misinterpretations of finite element analysis outputs and how to read simulation data with engineering confidence.',date:'',url:'#'},
+  {id:'b3',tag:'Product Dev',title:'From Sketch to Prototype: The Mechanovia Process',excerpt:'A behind-the-scenes walkthrough of how a product idea moves from concept to a fabrication-ready design package.',date:'',url:'#'}
+];
+
+const DEF_PROJECTS = [
+  {id:'p1',title:'Agricultural Seed Planter Mechanism',category:'cad',icon:'⚙',excerpt:'Multi-row precision seed planter designed for small-scale farming, optimized for minimal soil disturbance.',description:'This project involved the full mechanical design of a multi-row seed planter targeted at smallholder farmers. The design focused on achieving consistent seed spacing, minimal soil disturbance, and low manufacturing cost using locally available materials.\n\nKey engineering work included mechanism kinematics, seed metering system design, and structural analysis of the frame under field loading conditions.',tools:'SolidWorks, ANSYS Mechanical',duration:'8 weeks',status:'Completed',image:'',gallery:[]},
+  {id:'p2',title:'Structural FEA of Industrial Bracket',category:'simulation',icon:'◈',excerpt:'Finite element analysis of a load-bearing industrial bracket under dynamic cyclic loading conditions.',description:'A comprehensive structural analysis study of an industrial mounting bracket subjected to dynamic cyclic loads. The FEA work included mesh convergence studies, material property assignment, boundary condition setup, and fatigue life estimation.\n\nResults informed design modifications that improved the factor of safety from 1.4 to 2.3 while reducing material usage by 18%.',tools:'ANSYS Workbench, SolidWorks',duration:'3 weeks',status:'Completed',image:'',gallery:[]},
+  {id:'p3',title:'Automated Sorting Conveyor System',category:'cad',icon:'◉',excerpt:'Modular conveyor with integrated sorting gates, driven by mechanical cam actuation.',description:'Design of a fully mechanical automated sorting conveyor system for a small manufacturing facility.',tools:'SolidWorks, AutoCAD',duration:'6 weeks',status:'Completed',image:'',gallery:[]},
+  {id:'p4',title:'Thermal Analysis of Heat Exchanger',category:'simulation',icon:'≋',excerpt:'CFD-informed thermal study of a shell-and-tube heat exchanger.',description:'Thermal and fluid simulation of a shell-and-tube heat exchanger to optimize the internal baffle configuration. Optimization resulted in a 22% improvement in heat transfer efficiency.',tools:'ANSYS Fluent, SolidWorks',duration:'4 weeks',status:'Completed',image:'',gallery:[]},
+  {id:'p5',title:'Modular Hydroponic Frame System',category:'product',icon:'⬡',excerpt:'Stackable hydroponic growing frame engineered for structural stability and cost-effective fabrication.',description:'Full product development of a stackable modular hydroponic growing frame for urban agriculture applications.',tools:'SolidWorks, AutoCAD, ANSYS',duration:'10 weeks',status:'Completed',image:'',gallery:[]},
+  {id:'p6',title:'Soil Tillage Attachment Design',category:'research',icon:'∿',excerpt:'Research-driven design of a sub-surface tillage attachment for two-wheel tractors.',description:'A research-based mechanical design project developing a sub-surface tillage attachment for two-wheel power tillers.',tools:'SolidWorks, MATLAB, AutoCAD',duration:'12 weeks',status:'Completed',image:'',gallery:[]}
+];
+
+/* ══ STORAGE HELPERS ══ */
+const S = {
+  get: (k,def) => { try{ const v=localStorage.getItem(k); return v?JSON.parse(v):def; }catch(e){ return def; } },
+  set: (k,v) => localStorage.setItem(k,JSON.stringify(v)),
+  getCreds: () => S.get('mech_creds', DEF_CREDS),
+  getProjects: () => S.get('mech_projects', JSON.parse(JSON.stringify(DEF_PROJECTS))),
+  getServices: () => S.get('mech_services', JSON.parse(JSON.stringify(DEF_SERVICES))),
+  getTestimonials: () => S.get('mech_testimonials', JSON.parse(JSON.stringify(DEF_TESTIMONIALS))),
+  getBlog: () => S.get('mech_blog', JSON.parse(JSON.stringify(DEF_BLOG))),
+  getHero: () => S.get('mech_hero', {...DEF_HERO}),
+  getAbout: () => S.get('mech_about', {...DEF_ABOUT}),
+  getShowreel: () => S.get('mech_showreel', {...DEF_SHOWREEL}),
+};
+
+const CAT_LABEL = {cad:'CAD Design',simulation:'Simulation',product:'Product Dev',research:'Research'};
+const CAT_ICONS = {cad:'⚙',simulation:'◈',product:'⬡',research:'∿'};
+const uid = () => 'x'+Date.now().toString(36)+Math.random().toString(36).slice(2,5);
+
+/* ══ TOAST ══ */
+function toast(msg, isErr=false) {
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.className=isErr?'error show':'show';
+  setTimeout(()=>t.className='',2600);
+}
+
+/* ══ LOGIN ══ */
+function doLogin() {
+  const u=document.getElementById('loginUser').value.trim();
+  const p=document.getElementById('loginPass').value;
+  const creds=S.getCreds();
+  if(u===creds.username && p===creds.password) {
+    document.getElementById('loginScreen').style.display='none';
+    document.getElementById('adminApp').style.display='block';
+    renderAll(); go('dashboard');
+  } else {
+    document.getElementById('loginError').textContent='Incorrect username or password.';
+    document.getElementById('loginPass').value='';
+  }
+}
+document.getElementById('loginPass').addEventListener('keydown', e=>{ if(e.key==='Enter') doLogin(); });
+document.getElementById('loginUser').addEventListener('keydown', e=>{ if(e.key==='Enter') document.getElementById('loginPass').focus(); });
+
+function doLogout() {
+  document.getElementById('adminApp').style.display='none';
+  document.getElementById('loginScreen').style.display='flex';
+  document.getElementById('loginUser').value='';
+  document.getElementById('loginPass').value='';
+  document.getElementById('loginError').textContent='';
+}
+
+/* ══ NAVIGATION ══ */
+function go(panel) {
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.getElementById('panel-'+panel).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n=>{
+    n.classList.toggle('active', n.getAttribute('onclick').includes("'"+panel+"'"));
+  });
+  loadPanelData(panel);
+}
+
+function loadPanelData(panel) {
+  if(panel==='hero') loadHeroForm();
+  if(panel==='about') loadAboutForm();
+  if(panel==='showreel') loadShowreelForm();
+  if(panel==='credentials') loadCredentials();
+  if(panel==='services') renderServices();
+  if(panel==='testimonials') renderTestimonials();
+  if(panel==='blog') renderBlog();
+  if(panel==='projects') renderProjects();
+  if(panel==='dashboard') renderDashboard();
+}
+
+/* ══ DASHBOARD ══ */
+function renderDashboard() {
+  const projects=S.getProjects(), blog=S.getBlog(), services=S.getServices(), testimonials=S.getTestimonials();
+  document.getElementById('statsGrid').innerHTML=`
+    <div class="stat-card"><div class="stat-num">${projects.length}</div><div class="stat-lbl">Projects</div></div>
+    <div class="stat-card"><div class="stat-num">${blog.length}</div><div class="stat-lbl">Blog Posts</div></div>
+    <div class="stat-card"><div class="stat-num">${services.length}</div><div class="stat-lbl">Services</div></div>
+    <div class="stat-card"><div class="stat-num">${testimonials.length}</div><div class="stat-lbl">Testimonials</div></div>`;
+  const dp=document.getElementById('dashProjects');
+  dp.innerHTML=projects.slice(-4).reverse().map(p=>`<div class="list-row" style="margin-bottom:8px;"><div class="row-thumb">${p.image?`<img src="${p.image}">`:`<span>${p.icon||'⚙'}</span>`}</div><div class="row-info"><div class="row-title">${p.title}</div><div class="row-meta">${CAT_LABEL[p.category]||p.category}</div></div></div>`).join('')||'<div class="empty-state"><div class="empty-icon">◈</div><p>No projects yet</p><button class="btn btn-green btn-sm" onclick="go(\'projects\');openProjectModal()">+ Add Project</button></div>';
+  const db=document.getElementById('dashBlog');
+  db.innerHTML=blog.slice(-4).reverse().map(b=>`<div class="list-row" style="margin-bottom:8px;"><div class="row-info"><div class="row-title">${b.title}</div><div class="row-meta">${b.tag}${b.date?' · '+b.date:''}</div></div></div>`).join('')||'<div class="empty-state"><div class="empty-icon">✎</div><p>No posts yet</p><button class="btn btn-green btn-sm" onclick="go(\'blog\');openBlogModal()">+ Add Post</button></div>';
+}
+function renderAll(){ renderDashboard(); }
+
+/* ══ HERO ══ */
+function loadHeroForm() {
+  const h=S.getHero();
+  ['tag','line1','line2','line3','sub','s1n','s1l','s2n','s2l','s3n','s3l','s4n','s4l','cv'].forEach(k=>{
+    const el=document.getElementById('h_'+k); if(el) el.value=h[k]||'';
+  });
+}
+function saveHero() {
+  const h={};
+  ['tag','line1','line2','line3','sub','s1n','s1l','s2n','s2l','s3n','s3l','s4n','s4l','cv'].forEach(k=>{
+    const el=document.getElementById('h_'+k); if(el) h[k]=el.value.trim();
+  });
+  S.set('mech_hero',h); toast('Hero section saved!');
+}
+
+/* ══ ABOUT ══ */
+function loadAboutForm() {
+  const a=S.getAbout();
+  ['photo','name','title','bio1','bio2','bio3','email','whatsapp','yt','tw','li','ig','tt','location'].forEach(k=>{
+    const el=document.getElementById('a_'+k); if(el) el.value=a[k]||'';
+  });
+  updatePhotoPreview();
+}
+function updatePhotoPreview() {
+  const url=document.getElementById('a_photo').value.trim();
+  const prev=document.getElementById('a_photoPreview');
+  if(url){prev.src=url;prev.style.display='block';}else{prev.style.display='none';}
+}
+document.addEventListener('DOMContentLoaded',()=>{
+  const ph=document.getElementById('a_photo');
+  if(ph) ph.addEventListener('input', updatePhotoPreview);
+});
+function saveAbout() {
+  const a={};
+  ['photo','name','title','bio1','bio2','bio3','email','whatsapp','yt','tw','li','ig','tt','location'].forEach(k=>{
+    const el=document.getElementById('a_'+k); if(el) a[k]=el.value.trim();
+  });
+  S.set('mech_about',a); toast('Profile & about saved!');
+}
+
+/* ══ SHOWREEL ══ */
+function loadShowreelForm() {
+  const sr=S.getShowreel();
+  document.getElementById('sr_url').value=sr.url||'';
+  document.getElementById('sr_heading').value=sr.heading||'';
+  document.getElementById('sr_desc').value=sr.desc||'';
+}
+function saveShowreel() {
+  S.set('mech_showreel',{url:document.getElementById('sr_url').value.trim(),heading:document.getElementById('sr_heading').value.trim(),desc:document.getElementById('sr_desc').value.trim()});
+  toast('Showreel saved!');
+}
+
+/* ══ SERVICES ══ */
+function renderServices() {
+  const services=S.getServices();
+  const el=document.getElementById('serviceList');
+  if(!services.length){el.innerHTML='<div class="empty-state"><div class="empty-icon">⚙</div><p>No services yet</p><button class="btn btn-green" onclick="openServiceModal()">+ Add Service</button></div>';return;}
+  el.innerHTML=services.map(s=>`<div class="list-row"><div class="row-thumb"><span style="font-size:20px;">${s.icon||'⚙'}</span></div><div class="row-info"><div class="row-title">${s.title}</div><div class="row-meta" style="white-space:normal;">${s.desc}</div></div><div class="row-actions"><button class="btn btn-gray btn-sm" onclick="openServiceModal('${s.id}')">✎ Edit</button><button class="btn btn-red btn-sm" onclick="deleteService('${s.id}')">✕</button></div></div>`).join('');
+}
+function openServiceModal(id) {
+  const s=id?S.getServices().find(x=>x.id===id):{id:'',icon:'⚙',title:'',desc:''};
+  document.getElementById('modalBody').innerHTML=`
+    <h2 class="modal-h">${id?'Edit':'New'} <span>Service.</span></h2>
+    <input type="hidden" id="m_sid" value="${s.id||''}"/>
+    <div class="form-grid">
+      <div class="fg"><label>Icon (emoji)</label><input id="m_sicon" value="${s.icon||'⚙'}" placeholder="⚙"/></div>
+      <div class="fg"><label>Service Title</label><input id="m_stitle" value="${s.title||''}" placeholder="e.g. Mechanical Design"/></div>
+      <div class="fg full"><label>Description</label><textarea id="m_sdesc" rows="3" placeholder="2-3 sentences describing this service...">${s.desc||''}</textarea></div>
+    </div>
+    <div class="modal-footer"><button class="btn btn-green" onclick="saveService()">✓ Save Service</button><button class="btn btn-gray" onclick="closeModal()">Cancel</button></div>`;
+  document.getElementById('modal').classList.add('open');
+}
+function saveService() {
+  const id=document.getElementById('m_sid').value;
+  const title=document.getElementById('m_stitle').value.trim();
+  if(!title){alert('Title is required.');return;}
+  const services=S.getServices();
+  const data={id:id||uid(),icon:document.getElementById('m_sicon').value.trim()||'⚙',title,desc:document.getElementById('m_sdesc').value.trim()};
+  if(id){const i=services.findIndex(x=>x.id===id);if(i>-1)services[i]=data;else services.push(data);}else services.push(data);
+  S.set('mech_services',services); closeModal(); renderServices(); toast('Service saved!');
+}
+function deleteService(id){if(!confirm('Delete this service?'))return;S.set('mech_services',S.getServices().filter(x=>x.id!==id));renderServices();toast('Service deleted.');}
+
+/* ══ TESTIMONIALS ══ */
+function renderTestimonials() {
+  const list=S.getTestimonials();
+  const el=document.getElementById('testimonialList');
+  if(!list.length){el.innerHTML='<div class="empty-state"><div class="empty-icon">❝</div><p>No testimonials yet</p><button class="btn btn-green" onclick="openTestimonialModal()">+ Add Testimonial</button></div>';return;}
+  el.innerHTML=list.map(t=>`<div class="list-row"><div class="row-thumb">${t.avatar?`<img src="${t.avatar}">`:`<span style="font-family:var(--font-display);color:var(--green);">${(t.name||'?')[0].toUpperCase()}</span>`}</div><div class="row-info"><div class="row-title">${t.name||'—'} <span style="color:var(--gray);font-weight:400;font-size:11px;">· ${t.role||''}</span></div><div class="row-meta" style="white-space:normal;">"${(t.quote||'').slice(0,100)}${t.quote&&t.quote.length>100?'...':''}"</div></div><div class="row-actions"><button class="btn btn-gray btn-sm" onclick="openTestimonialModal('${t.id}')">✎ Edit</button><button class="btn btn-red btn-sm" onclick="deleteTestimonial('${t.id}')">✕</button></div></div>`).join('');
+}
+function openTestimonialModal(id) {
+  const t=id?S.getTestimonials().find(x=>x.id===id):{id:'',quote:'',name:'',role:'',avatar:''};
+  document.getElementById('modalBody').innerHTML=`
+    <h2 class="modal-h">${id?'Edit':'New'} <span>Testimonial.</span></h2>
+    <input type="hidden" id="m_tid" value="${t.id||''}"/>
+    <div class="form-grid">
+      <div class="fg full"><label>Quote / Testimonial Text</label><textarea id="m_tquote" rows="4" placeholder="What they said about Mechanovia...">${t.quote||''}</textarea></div>
+      <div class="fg"><label>Name</label><input id="m_tname" value="${t.name||''}" placeholder="e.g. Dr. Emeka Eze"/></div>
+      <div class="fg"><label>Role / Organisation</label><input id="m_trole" value="${t.role||''}" placeholder="e.g. Head of Engineering, ABC Ltd"/></div>
+      <div class="fg full"><label>Avatar Image URL (optional)</label><input id="m_tavatar" value="${t.avatar||''}" placeholder="images/avatar-name.jpg"/><span class="hint">Upload image to GitHub /images/ folder, paste path here.</span></div>
+    </div>
+    <div class="modal-footer"><button class="btn btn-green" onclick="saveTestimonial()">✓ Save</button><button class="btn btn-gray" onclick="closeModal()">Cancel</button></div>`;
+  document.getElementById('modal').classList.add('open');
+}
+function saveTestimonial() {
+  const id=document.getElementById('m_tid').value;
+  const quote=document.getElementById('m_tquote').value.trim();
+  const name=document.getElementById('m_tname').value.trim();
+  if(!quote||!name){alert('Quote and Name are required.');return;}
+  const list=S.getTestimonials();
+  const data={id:id||uid(),quote,name,role:document.getElementById('m_trole').value.trim(),avatar:document.getElementById('m_tavatar').value.trim()};
+  if(id){const i=list.findIndex(x=>x.id===id);if(i>-1)list[i]=data;else list.push(data);}else list.push(data);
+  S.set('mech_testimonials',list); closeModal(); renderTestimonials(); toast('Testimonial saved!');
+}
+function deleteTestimonial(id){if(!confirm('Delete this testimonial?'))return;S.set('mech_testimonials',S.getTestimonials().filter(x=>x.id!==id));renderTestimonials();toast('Deleted.');}
+
+/* ══ BLOG ══ */
+function renderBlog() {
+  const posts=S.getBlog();
+  const el=document.getElementById('blogList');
+  if(!posts.length){el.innerHTML='<div class="empty-state"><div class="empty-icon">✎</div><p>No posts yet</p><button class="btn btn-green" onclick="openBlogModal()">+ Add Post</button></div>';return;}
+  el.innerHTML=posts.map(b=>`<div class="list-row"><div class="row-info"><div class="row-title">${b.title}</div><div class="row-meta">${b.tag}${b.date?' · '+b.date:''}</div></div><div class="row-actions"><button class="btn btn-gray btn-sm" onclick="openBlogModal('${b.id}')">✎ Edit</button><button class="btn btn-red btn-sm" onclick="deleteBlog('${b.id}')">✕</button></div></div>`).join('');
+}
+function openBlogModal(id) {
+  const b=id?S.getBlog().find(x=>x.id===id):{id:'',tag:'',title:'',excerpt:'',date:'',url:'#'};
+  document.getElementById('modalBody').innerHTML=`
+    <h2 class="modal-h">${id?'Edit':'New'} <span>Blog Post.</span></h2>
+    <input type="hidden" id="m_bid" value="${b.id||''}"/>
+    <div class="form-grid">
+      <div class="fg"><label>Category Tag</label><input id="m_btag" value="${b.tag||''}" placeholder="e.g. CAD Design"/></div>
+      <div class="fg"><label>Date</label><input id="m_bdate" type="date" value="${b.date||''}"/></div>
+      <div class="fg full"><label>Post Title</label><input id="m_btitle" value="${b.title||''}" placeholder="Engineering post title..."/></div>
+      <div class="fg full"><label>Excerpt / Summary</label><textarea id="m_bexcerpt" rows="3" placeholder="Short description shown on the blog card...">${b.excerpt||''}</textarea></div>
+      <div class="fg full"><label>Post URL / Link</label><input id="m_burl" value="${b.url||'#'}" placeholder="https://your-article-link.com or #"/><span class="hint">Link to your full article. If hosted on Medium, LinkedIn, etc., paste the full URL.</span></div>
+    </div>
+    <div class="modal-footer"><button class="btn btn-green" onclick="saveBlog()">✓ Save Post</button><button class="btn btn-gray" onclick="closeModal()">Cancel</button></div>`;
+  document.getElementById('modal').classList.add('open');
+}
+function saveBlog() {
+  const id=document.getElementById('m_bid').value;
+  const title=document.getElementById('m_btitle').value.trim();
+  const excerpt=document.getElementById('m_bexcerpt').value.trim();
+  if(!title||!excerpt){alert('Title and Excerpt are required.');return;}
+  const posts=S.getBlog();
+  const data={id:id||uid(),tag:document.getElementById('m_btag').value.trim(),title,excerpt,date:document.getElementById('m_bdate').value,url:document.getElementById('m_burl').value.trim()||'#'};
+  if(id){const i=posts.findIndex(x=>x.id===id);if(i>-1)posts[i]=data;else posts.push(data);}else posts.push(data);
+  S.set('mech_blog',posts); closeModal(); renderBlog(); toast('Post saved!');
+}
+function deleteBlog(id){if(!confirm('Delete this post?'))return;S.set('mech_blog',S.getBlog().filter(x=>x.id!==id));renderBlog();toast('Post deleted.');}
+
+/* ══ PROJECTS ══ */
+function renderProjects() {
+  const projects=S.getProjects();
+  const el=document.getElementById('projectList');
+  if(!projects.length){el.innerHTML='<div class="empty-state"><div class="empty-icon">◈</div><p>No projects yet</p><button class="btn btn-green" onclick="openProjectModal()">+ Add Project</button></div>';return;}
+  el.innerHTML=projects.map(p=>`<div class="list-row"><div class="row-thumb">${p.image?`<img src="${p.image}" alt="">`:`<span>${p.icon||'⚙'}</span>`}</div><div class="row-info"><div class="row-title">${p.title}</div><div class="row-meta">${p.duration||'—'} · ${p.tools||'—'}</div></div><span class="cat-tag">${CAT_LABEL[p.category]||p.category}</span><div class="row-actions"><button class="btn btn-gray btn-sm" onclick="openProjectModal('${p.id}')">✎ Edit</button><button class="btn btn-red btn-sm" onclick="deleteProject('${p.id}')">✕</button></div></div>`).join('');
+}
+function openProjectModal(id) {
+  const p=id?S.getProjects().find(x=>x.id===id):null;
+  const v=p||{id:'',title:'',category:'cad',status:'Completed',duration:'',tools:'',excerpt:'',description:'',image:'',gallery:[]};
+  document.getElementById('modalBody').innerHTML=`
+    <h2 class="modal-h">${id?'Edit':'New'} <span>Project.</span></h2>
+    <input type="hidden" id="m_pid" value="${v.id||''}"/>
+    <div class="form-grid">
+      <div class="fg full"><label>Project Title *</label><input id="m_ptitle" value="${v.title||''}" placeholder="e.g. Agricultural Seed Planter Mechanism"/></div>
+      <div class="fg"><label>Category *</label><select id="m_pcat"><option value="cad"${v.category==='cad'?' selected':''}>CAD Design</option><option value="simulation"${v.category==='simulation'?' selected':''}>Simulation</option><option value="product"${v.category==='product'?' selected':''}>Product Dev</option><option value="research"${v.category==='research'?' selected':''}>Research</option></select></div>
+      <div class="fg"><label>Status</label><select id="m_pstatus"><option${v.status==='Completed'?' selected':''}>Completed</option><option${v.status==='In Progress'?' selected':''}>In Progress</option><option${v.status==='On Hold'?' selected':''}>On Hold</option></select></div>
+      <div class="fg"><label>Duration</label><input id="m_pdur" value="${v.duration||''}" placeholder="e.g. 8 weeks"/></div>
+      <div class="fg"><label>Tools Used</label><input id="m_ptools" value="${v.tools||''}" placeholder="e.g. SolidWorks, ANSYS"/></div>
+      <div class="fg full"><label>Short Excerpt *</label><input id="m_pexcerpt" value="${v.excerpt||''}" placeholder="One sentence shown on portfolio card..."/></div>
+      <div class="fg full"><label>Full Description *</label><textarea id="m_pdesc" rows="6" placeholder="Full project description. Use blank line to separate paragraphs.">${v.description||''}</textarea></div>
+      <div class="fg full">
+        <label>Cover Image URL</label>
+        <input id="m_pimage" value="${v.image||''}" placeholder="images/my-project.jpg" oninput="updateProjImgPreview()"/>
+        <span class="hint">Upload image to your GitHub repo in an /images/ folder, then paste the path here. e.g. images/seed-planter.jpg</span>
+        <img id="m_pimgPreview" src="${v.image||''}" alt="" style="display:${v.image?'block':'none'};width:100%;height:120px;object-fit:cover;margin-top:8px;border:1px solid var(--border-dim);"/>
+      </div>
+      <div class="fg full">
+        <label>Gallery Images (one URL per line)</label>
+        <textarea id="m_pgallery" rows="3" placeholder="images/project-detail-1.jpg&#10;images/project-detail-2.jpg">${(v.gallery||[]).join('\n')}</textarea>
+        <span class="hint">Each line = one extra gallery image on the project detail page.</span>
+      </div>
+    </div>
+    <div class="modal-footer"><button class="btn btn-green" onclick="saveProject()">✓ Save Project</button><button class="btn btn-gray" onclick="closeModal()">Cancel</button></div>`;
+  document.getElementById('modal').classList.add('open');
+}
+function updateProjImgPreview(){const url=document.getElementById('m_pimage').value.trim(),prev=document.getElementById('m_pimgPreview');if(url){prev.src=url;prev.style.display='block';}else prev.style.display='none';}
+function saveProject() {
+  const id=document.getElementById('m_pid').value;
+  const title=document.getElementById('m_ptitle').value.trim();
+  const excerpt=document.getElementById('m_pexcerpt').value.trim();
+  const desc=document.getElementById('m_pdesc').value.trim();
+  if(!title||!excerpt||!desc){alert('Title, Excerpt and Description are required.');return;}
+  const cat=document.getElementById('m_pcat').value;
+  const projects=S.getProjects();
+  const gallery=document.getElementById('m_pgallery').value.split('\n').map(s=>s.trim()).filter(Boolean);
+  const data={id:id||uid(),title,category:cat,icon:CAT_ICONS[cat]||'⚙',excerpt,description:desc,tools:document.getElementById('m_ptools').value.trim(),duration:document.getElementById('m_pdur').value.trim(),status:document.getElementById('m_pstatus').value,image:document.getElementById('m_pimage').value.trim(),gallery};
+  if(id){const i=projects.findIndex(x=>x.id===id);if(i>-1)projects[i]=data;else projects.push(data);}else projects.push(data);
+  S.set('mech_projects',projects); closeModal(); renderProjects(); toast(id?'Project updated!':'Project added!');
+}
+function deleteProject(id){if(!confirm('Delete this project? Cannot be undone.'))return;S.set('mech_projects',S.getProjects().filter(x=>x.id!==id));renderProjects();toast('Project deleted.');}
+
+/* ══ CREDENTIALS ══ */
+function loadCredentials() { document.getElementById('showUsername').textContent=S.getCreds().username||'—'; }
+function changeUsername() {
+  const curr=document.getElementById('c_currUser').value.trim();
+  const newU=document.getElementById('c_newUser').value.trim();
+  const creds=S.getCreds();
+  if(curr!==creds.username){toast('Current username is incorrect.',true);return;}
+  if(!newU||newU.length<3){toast('New username must be at least 3 characters.',true);return;}
+  S.set('mech_creds',{...creds,username:newU});
+  document.getElementById('c_currUser').value='';document.getElementById('c_newUser').value='';
+  loadCredentials(); toast('Username updated!');
+}
+function changePassword() {
+  const curr=document.getElementById('c_currPass').value;
+  const nw=document.getElementById('c_newPass').value;
+  const conf=document.getElementById('c_confPass').value;
+  const creds=S.getCreds();
+  if(curr!==creds.password){toast('Current password is incorrect.',true);return;}
+  if(!nw||nw.length<8){toast('New password must be at least 8 characters.',true);return;}
+  if(nw!==conf){toast('New passwords do not match.',true);return;}
+  S.set('mech_creds',{...creds,password:nw});
+  document.getElementById('c_currPass').value='';document.getElementById('c_newPass').value='';document.getElementById('c_confPass').value='';
+  toast('Password updated!');
+}
+
+/* ══ DATA ══ */
+function exportAll() {
+  const all={projects:S.getProjects(),services:S.getServices(),testimonials:S.getTestimonials(),blog:S.getBlog(),hero:S.getHero(),about:S.getAbout(),showreel:S.getShowreel(),exported:new Date().toISOString()};
+  const blob=new Blob([JSON.stringify(all,null,2)],{type:'application/json'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');a.href=url;a.download='mechanovia-backup-'+new Date().toISOString().slice(0,10)+'.json';a.click();
+  URL.revokeObjectURL(url); toast('Backup downloaded!');
+}
+function importData(event) {
+  const file=event.target.files[0];
+  if(!file)return;
+  if(!confirm('This will overwrite ALL current data with the backup. Continue?'))return;
+  const reader=new FileReader();
+  reader.onload=function(e){
+    try{
+      const data=JSON.parse(e.target.result);
+      if(data.projects) S.set('mech_projects',data.projects);
+      if(data.services) S.set('mech_services',data.services);
+      if(data.testimonials) S.set('mech_testimonials',data.testimonials);
+      if(data.blog) S.set('mech_blog',data.blog);
+      if(data.hero) S.set('mech_hero',data.hero);
+      if(data.about) S.set('mech_about',data.about);
+      if(data.showreel) S.set('mech_showreel',data.showreel);
+      renderAll(); toast('Data imported successfully!');
+    }catch(err){toast('Invalid backup file.',true);}
+  };
+  reader.readAsText(file);
+  event.target.value='';
+}
+function resetAll() {
+  if(!confirm('⚠ Reset ALL data to factory defaults? This permanently deletes all your content.'))return;
+  if(!confirm('Are you absolutely sure? This cannot be undone.'))return;
+  ['mech_projects','mech_services','mech_testimonials','mech_blog','mech_hero','mech_about','mech_showreel'].forEach(k=>localStorage.removeItem(k));
+  renderAll(); go('dashboard'); toast('All data reset to defaults.');
+}
+
+/* ══ MODAL ══ */
+function closeModal(){document.getElementById('modal').classList.remove('open');}
+document.getElementById('modal').addEventListener('click',function(e){if(e.target===this)closeModal();});
+</script>
+</body>
+</html>
